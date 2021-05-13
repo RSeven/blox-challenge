@@ -51,4 +51,13 @@ RSpec.describe Event, type: :model do
     expect(subject).to_not be_valid
   end
 
+  it "is not valid if an event is already scheduled to the same classroom at the same time" do
+    Event.create!(title: subject.title,
+                  start_time: subject.start_time,
+                  end_time: subject.end_time,
+                  user: subject.user,
+                  classroom: subject.classroom)
+    expect(subject).to_not be_valid
+  end
+
 end

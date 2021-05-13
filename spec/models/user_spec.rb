@@ -25,4 +25,10 @@ RSpec.describe User, type: :model do
     subject.password_confirmation = "wrong_pass"
     expect(subject).to_not be_valid
   end
+
+  it "is not valid with a duplicate name" do
+    User.create!(name: subject.name,
+                  password: subject.password)
+    expect(subject).to_not be_valid
+  end
 end
