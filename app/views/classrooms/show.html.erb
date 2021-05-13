@@ -1,0 +1,25 @@
+<div class="container">
+  <p id="notice"><%= notice %></p>
+
+  <p>
+    <strong>Name:</strong>
+    <%= @classroom.name %>
+  </p>
+
+  <%= month_calendar(events: @events) do |date, events| %>
+    <%= date.day %>
+
+    <ul>
+      <% events.each do |event| %>
+        <li>
+          <%= event.start_time.strftime("%I:%M%p") %> <%= event.title %>
+        </li>
+      <% end %>
+    </ul>
+
+    <%= link_to '+ New event', new_event_path %>
+  <% end %>
+
+  <%= link_to 'Edit', edit_classroom_path(@classroom) %> |
+  <%= link_to 'Back', classrooms_path %>
+</div>
