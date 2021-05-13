@@ -13,15 +13,27 @@
 # sticking to rails and rspec-rails APIs to keep things simple and stable.
 
 RSpec.describe "/events", type: :request do
+  let(:user) { User.create(name: "test_user", password: "test_pass") }
+  let(:classroom) { Classroom.create(name: "test classroom") }
   
-  # Event. As you add validations to Event, be sure to
-  # adjust the attributes here as well.
   let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
+    {
+      title: "test event title",
+      start_time: Time.now + 1.hour,
+      end_time: Time.now + 2.hour,
+      user_id: user.id,
+      classroom_id: classroom.id
+    }
   }
 
   let(:invalid_attributes) {
-    skip("Add a hash of attributes invalid for your model")
+    {
+      title: nil,
+      start_time: nil,
+      end_time: nil,
+      user_id: nil,
+      classroom_id: nil
+    }
   }
 
   describe "GET /index" do
@@ -76,24 +88,34 @@ RSpec.describe "/events", type: :request do
         }.to change(Event, :count).by(0)
       end
 
-      it "renders a successful response (i.e. to display the 'new' template)" do
+      it "renders a response with 422 status - unporcessable entity" do
         post events_url, params: { event: invalid_attributes }
-        expect(response).to be_successful
+        expect(response.status).to eq(422)
       end
     end
   end
 
   describe "PATCH /update" do
     context "with valid parameters" do
+      let(:user2) { User.create(name: "test_user 2", password: "test_pass") }
+      let(:classroom2) { Classroom.create(name: "test classroom 2") }
       let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
+        {
+          title: "test event title 2",
+          start_time: Time.now + 2.hour,
+          end_time: Time.now + 3.hour,
+          user_id: user.id,
+          classroom_id: classroom.id
+        }
       }
 
       it "updates the requested event" do
         event = Event.create! valid_attributes
         patch event_url(event), params: { event: new_attributes }
         event.reload
-        skip("Add assertions for updated state")
+        expect(event.title).to eq(new_attributes[:title])
+        expect(event.user_id).to eq(new_attributes[:user_id])
+        expect(event.classroom_id).to eq(new_attributes[:classroom_id])
       end
 
       it "redirects to the event" do
@@ -105,10 +127,10 @@ RSpec.describe "/events", type: :request do
     end
 
     context "with invalid parameters" do
-      it "renders a successful response (i.e. to display the 'edit' template)" do
+      it "renders a response with 422 status - unporcessable entity" do
         event = Event.create! valid_attributes
         patch event_url(event), params: { event: invalid_attributes }
-        expect(response).to be_successful
+        expect(response.status).to eq(422)
       end
     end
   end

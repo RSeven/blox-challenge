@@ -6,11 +6,10 @@ RSpec.describe Event, type: :model do
 
   subject {
     described_class.new(title: "test event title",
-                        start_time: Time.now,
-                        end_time: Time.now + 1.hour,
+                        start_time: Time.now + 1.hour,
+                        end_time: Time.now + 2.hour,
                         user: user,
-                        classroom: classroom
-                      )
+                        classroom: classroom)
   }
 
   it "is valid with valid attributes" do
@@ -39,6 +38,16 @@ RSpec.describe Event, type: :model do
 
   it "is not valid without a classroom" do
     subject.classroom = nil
+    expect(subject).to_not be_valid
+  end
+
+  it "is not valid with a start_time in the past" do
+    subject.start_time = Time.now - 1.hour
+    expect(subject).to_not be_valid
+  end
+
+  it "is not valid with a end_time before start_time" do
+    subject.end_time = subject.start_time - 1.hour
     expect(subject).to_not be_valid
   end
 

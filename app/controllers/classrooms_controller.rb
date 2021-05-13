@@ -8,7 +8,7 @@ class ClassroomsController < ApplicationController
 
   # GET /classrooms/1 or /classrooms/1.json
   def show
-    @events = Event.all
+    @events = Event.where(classroom: @classroom)
   end
 
   # GET /classrooms/new

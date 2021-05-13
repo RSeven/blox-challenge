@@ -17,7 +17,7 @@
       <% end %>
     </ul>
 
-    <%= link_to '+ New event', new_event_path %>
+    <%= link_to '+ New event', new_event_path(date: date, classroom_id: @classroom.id) %>
   <% end %>
 
   <%= link_to 'Edit', edit_classroom_path(@classroom) %> |
