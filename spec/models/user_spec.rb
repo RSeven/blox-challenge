@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe User, type: :model do
   subject {
-    described_class.new(name: "test_user",
+    described_class.new(email: "user@test.com",
                         password: "test_pass",
                         password_confirmation: "test_pass")
   }
@@ -11,8 +11,8 @@ RSpec.describe User, type: :model do
     expect(subject).to be_valid
   end
 
-  it "is not valid without a name" do
-    subject.name = nil
+  it "is not valid without an email" do
+    subject.email = nil
     expect(subject).to_not be_valid
   end
 
@@ -26,8 +26,8 @@ RSpec.describe User, type: :model do
     expect(subject).to_not be_valid
   end
 
-  it "is not valid with a duplicate name" do
-    User.create!(name: subject.name,
+  it "is not valid with a duplicate email" do
+    User.create!(email: subject.email,
                   password: subject.password)
     expect(subject).to_not be_valid
   end

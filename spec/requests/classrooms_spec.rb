@@ -24,6 +24,15 @@ RSpec.describe "/classrooms", type: :request do
     { name: nil }
   }
 
+  let(:user) { User.create(email: "user@test.com",
+                        password: "test_pass",
+                        password_confirmation: "test_pass")
+  }
+
+  before(:each) do
+    sign_in user
+  end
+
   describe "GET /index" do
     it "renders a successful response" do
       Classroom.create! valid_attributes

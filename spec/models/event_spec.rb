@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe Event, type: :model do
-  let(:user) { User.create(name: "test_user", password: "test_pass") }
+  let(:user) { User.create(email: "user@test.com", password: "test_pass") }
   let(:classroom) { Classroom.create(name: "test classroom") }
 
   subject {

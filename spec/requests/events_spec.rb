@@ -13,7 +13,7 @@
 # sticking to rails and rspec-rails APIs to keep things simple and stable.
 
 RSpec.describe "/events", type: :request do
-  let(:user) { User.create(name: "test_user", password: "test_pass") }
+  let(:user) { User.create(email: "user@test.com", password: "test_pass") }
   let(:classroom) { Classroom.create(name: "test classroom") }
   
   let(:valid_attributes) {
@@ -36,11 +36,15 @@ RSpec.describe "/events", type: :request do
     }
   }
 
+  before(:each) do
+    sign_in user
+  end
+
   describe "GET /index" do
     it "renders a successful response" do
       Event.create! valid_attributes
       get events_url
-      expect(response).to be_successful
+      expect(response).to be_redirect
     end
   end
 
