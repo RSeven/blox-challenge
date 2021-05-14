@@ -1,6 +1,7 @@
 class EventsController < ApplicationController
   before_action :set_event, only: %i[ show edit update destroy ]
   before_action :authenticate_user!
+  before_action :owner_only!, only: %i[ edit update destroy ]
 
   # GET /events or /events.json
   def index
@@ -53,9 +54,10 @@ class EventsController < ApplicationController
 
   # DELETE /events/1 or /events/1.json
   def destroy
+    classroom = @event.classroom
     @event.destroy
     respond_to do |format|
-      format.html { redirect_to events_url, notice: "Event was successfully destroyed." }
+      format.html { redirect_to classroom_path(classroom), notice: "Event was successfully destroyed." }
       format.json { head :no_content }
     end
   end
@@ -69,5 +71,12 @@ class EventsController < ApplicationController
     # Only allow a list of trusted parameters through.
     def event_params
       params.require(:event).permit(:title, :start_time, :end_time, :user_id, :classroom_id)
+    end
+
+    def owner_only!
+      unless @event.user == current_user
+        flash[:alert] = "You have to own this event before taking this action."
+        redirect_to classroom_path(@event.classroom)
+      end
     end
 end

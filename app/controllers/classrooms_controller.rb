@@ -1,6 +1,7 @@
 class ClassroomsController < ApplicationController
   before_action :set_classroom, only: %i[ show edit update destroy ]
   before_action :authenticate_user!
+  before_action :moderator_only!, except: %i[ index show ]
 
   # GET /classrooms or /classrooms.json
   def index

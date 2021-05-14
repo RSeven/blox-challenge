@@ -14,6 +14,7 @@
 
 RSpec.describe "/events", type: :request do
   let(:user) { User.create(email: "user@test.com", password: "test_pass") }
+  let(:moderator) { User.create(email: "user@test.com", password: "test_pass", role: :moderator) }
   let(:classroom) { Classroom.create(name: "test classroom") }
   
   let(:valid_attributes) {
@@ -36,121 +37,230 @@ RSpec.describe "/events", type: :request do
     }
   }
 
-  before(:each) do
-    sign_in user
-  end
-
-  describe "GET /index" do
-    it "renders a successful response" do
-      Event.create! valid_attributes
-      get events_url
-      expect(response).to be_redirect
-    end
-  end
-
   describe "GET /show" do
-    it "renders a successful response" do
-      event = Event.create! valid_attributes
-      get event_url(event)
-      expect(response).to be_successful
+    context "with no user" do
+      it "redirects user" do
+        event = Event.create! valid_attributes
+        get event_url(event)
+        expect(response).to redirect_to(new_user_session_path)
+      end
+
+      it "renders a response with 302 status - redirected" do
+        event = Event.create! valid_attributes
+        get event_url(event)
+        expect(response.status).to eq(302)
+      end
+    end
+
+    context "with common user" do
+      before(:each) do
+        sign_in user
+      end
+      
+      it "renders a successful response" do
+        event = Event.create! valid_attributes
+        get event_url(event)
+        expect(response).to be_successful
+      end
     end
   end
 
   describe "GET /new" do
-    it "renders a successful response" do
-      get new_event_url
-      expect(response).to be_successful
+    context "with no user" do
+      it "redirects user" do
+        get new_event_url
+        expect(response).to redirect_to(new_user_session_path)
+      end
+
+      it "renders a response with 302 status - redirected" do
+        get new_event_url
+        expect(response.status).to eq(302)
+      end
+    end
+
+    context "with common user" do
+      before(:each) do
+        sign_in user
+      end
+      
+      context "without a defined classroom" do
+      end
+
+      context "with a defined classroom" do
+        it "renders a successful response" do
+          get new_event_url(classroom_id: classroom.id)
+          expect(response).to be_successful
+        end
+      end
     end
   end
 
   describe "GET /edit" do
-    it "render a successful response" do
-      event = Event.create! valid_attributes
-      get edit_event_url(event)
-      expect(response).to be_successful
+    context "with no user" do
+      it "redirects user" do
+        event = Event.create! valid_attributes
+        get edit_event_url(event)
+        expect(response).to redirect_to(new_user_session_path)
+      end
+
+      it "renders a response with 302 status - redirected" do
+        event = Event.create! valid_attributes
+        get edit_event_url(event)
+        expect(response.status).to eq(302)
+      end
+    end
+
+    context "with common user" do
+      before(:each) do
+        sign_in user
+      end
+      
+      it "render a successful response" do
+        event = Event.create! valid_attributes
+        get edit_event_url(event)
+        expect(response).to be_successful
+      end
     end
   end
 
   describe "POST /create" do
-    context "with valid parameters" do
-      it "creates a new Event" do
-        expect {
-          post events_url, params: { event: valid_attributes }
-        }.to change(Event, :count).by(1)
+    context "with no user" do
+      it "redirects user" do
+        post events_url, params: { event: valid_attributes }
+        expect(response).to redirect_to(new_user_session_path)
       end
 
-      it "redirects to the created event" do
+      it "renders a response with 302 status - redirected" do
         post events_url, params: { event: valid_attributes }
-        expect(response).to redirect_to(event_url(Event.last))
+        expect(response.status).to eq(302)
       end
     end
 
-    context "with invalid parameters" do
-      it "does not create a new Event" do
-        expect {
-          post events_url, params: { event: invalid_attributes }
-        }.to change(Event, :count).by(0)
+    context "with common user" do
+      before(:each) do
+        sign_in user
+      end
+      
+      context "with valid parameters" do
+        it "creates a new Event" do
+          expect {
+            post events_url, params: { event: valid_attributes }
+          }.to change(Event, :count).by(1)
+        end
+
+        it "redirects to the created event" do
+          post events_url, params: { event: valid_attributes }
+          expect(response).to redirect_to(event_url(Event.last))
+        end
       end
 
-      it "renders a response with 422 status - unporcessable entity" do
-        post events_url, params: { event: invalid_attributes }
-        expect(response.status).to eq(422)
+      context "with invalid parameters" do
+        it "does not create a new Event" do
+          expect {
+            post events_url, params: { event: invalid_attributes }
+          }.to change(Event, :count).by(0)
+        end
+
+        it "renders a response with 422 status - unporcessable entity" do
+          post events_url, params: { event: invalid_attributes }
+          expect(response.status).to eq(422)
+        end
       end
     end
   end
 
   describe "PATCH /update" do
-    context "with valid parameters" do
-      let(:user2) { User.create(name: "test_user 2", password: "test_pass") }
-      let(:classroom2) { Classroom.create(name: "test classroom 2") }
-      let(:new_attributes) {
-        {
-          title: "test event title 2",
-          start_time: Time.now + 2.hour,
-          end_time: Time.now + 3.hour,
-          user_id: user.id,
-          classroom_id: classroom.id
-        }
+    let(:user2) { User.create(email: "test_user2@example.com", password: "test_pass") }
+    let(:classroom2) { Classroom.create(name: "test classroom 2") }
+    let(:new_attributes) {
+      {
+        title: "test event title 2",
+        start_time: Time.now + 2.hour,
+        end_time: Time.now + 3.hour,
+        user_id: user2.id,
+        classroom_id: classroom2.id
       }
+    }
 
-      it "updates the requested event" do
+    context "with no user" do
+      it "redirects user" do
         event = Event.create! valid_attributes
         patch event_url(event), params: { event: new_attributes }
-        event.reload
-        expect(event.title).to eq(new_attributes[:title])
-        expect(event.user_id).to eq(new_attributes[:user_id])
-        expect(event.classroom_id).to eq(new_attributes[:classroom_id])
+        expect(response).to redirect_to(new_user_session_path)
       end
 
-      it "redirects to the event" do
+      it "renders a response with 302 status - redirected" do
         event = Event.create! valid_attributes
         patch event_url(event), params: { event: new_attributes }
-        event.reload
-        expect(response).to redirect_to(event_url(event))
+        expect(response.status).to eq(302)
       end
     end
 
-    context "with invalid parameters" do
-      it "renders a response with 422 status - unporcessable entity" do
-        event = Event.create! valid_attributes
-        patch event_url(event), params: { event: invalid_attributes }
-        expect(response.status).to eq(422)
+    context "with common user" do
+      before(:each) do
+        sign_in user
+      end
+        
+      context "with valid parameters" do
+        it "updates the requested event" do
+          event = Event.create! valid_attributes
+          patch event_url(event), params: { event: new_attributes }
+          event.reload
+          expect(event.title).to eq(new_attributes[:title])
+          expect(event.user_id).to eq(new_attributes[:user_id])
+          expect(event.classroom_id).to eq(new_attributes[:classroom_id])
+        end
+
+        it "redirects to the event" do
+          event = Event.create! valid_attributes
+          patch event_url(event), params: { event: new_attributes }
+          event.reload
+          expect(response).to redirect_to(event_url(event))
+        end
+      end
+
+      context "with invalid parameters" do
+        it "renders a response with 422 status - unporcessable entity" do
+          event = Event.create! valid_attributes
+          patch event_url(event), params: { event: invalid_attributes }
+          expect(response.status).to eq(422)
+        end
       end
     end
   end
 
   describe "DELETE /destroy" do
-    it "destroys the requested event" do
-      event = Event.create! valid_attributes
-      expect {
+    context "with no user" do
+      it "redirects user" do
+        event = Event.create! valid_attributes
         delete event_url(event)
-      }.to change(Event, :count).by(-1)
+        expect(response).to redirect_to(new_user_session_path)
+      end
+
+      it "renders a response with 302 status - redirected" do
+        event = Event.create! valid_attributes
+        delete event_url(event)
+        expect(response.status).to eq(302)
+      end
     end
 
-    it "redirects to the events list" do
-      event = Event.create! valid_attributes
-      delete event_url(event)
-      expect(response).to redirect_to(events_url)
+    context "with common user" do
+      before(:each) do
+        sign_in user
+      end
+        
+      it "destroys the requested event" do
+        event = Event.create! valid_attributes
+        expect {
+          delete event_url(event)
+        }.to change(Event, :count).by(-1)
+      end
+
+      it "redirects to the events list" do
+        event = Event.create! valid_attributes
+        delete event_url(event)
+        expect(response).to redirect_to(classroom_url(classroom))
+      end
     end
   end
 end

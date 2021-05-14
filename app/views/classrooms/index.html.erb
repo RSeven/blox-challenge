@@ -13,10 +13,11 @@
   <tbody>
     <% @classrooms.each do |classroom| %>
       <tr>
-        <td><%= classroom.name %></td>
-        <td><%= link_to 'Show', classroom %></td>
-        <td><%= link_to 'Edit', edit_classroom_path(classroom) %></td>
-        <td><%= link_to 'Destroy', classroom, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <td><%= link_to classroom.name, classroom, class: "btn btn-primary" %></td>
+        <% if current_user.moderator? %>
+          <td><%= link_to 'Edit', edit_classroom_path(classroom) %></td>
+          <td><%= link_to 'Destroy', classroom, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <% end %>
       </tr>
     <% end %>
   </tbody>
@@ -24,4 +25,6 @@
 
 <br>
 
-<%= link_to 'New Classroom', new_classroom_path %>
+<% if current_user.moderator? %>
+  <%= link_to 'New Classroom', new_classroom_path %>
+<% end %>

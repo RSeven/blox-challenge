@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  resources :events
+  resources :events, except: [ :index ]
   resources :classrooms
   
   devise_for :users

@@ -25,115 +25,337 @@ RSpec.describe "/classrooms", type: :request do
   }
 
   let(:user) { User.create(email: "user@test.com",
-                        password: "test_pass",
-                        password_confirmation: "test_pass")
+                        password: "test_pass")
   }
 
-  before(:each) do
-    sign_in user
-  end
+  let(:moderator) { User.create(email: "user@test.com",
+                        password: "test_pass",
+                        role: :moderator)
+  }
 
   describe "GET /index" do
-    it "renders a successful response" do
-      Classroom.create! valid_attributes
-      get classrooms_url
-      expect(response).to be_successful
+    context "with no user" do
+      it "redirects user" do
+        Classroom.create! valid_attributes
+        get classrooms_url
+        expect(response).to redirect_to(new_user_session_path)
+      end
+
+      it "renders a response with 302 status - redirected" do
+        Classroom.create! valid_attributes
+        get classrooms_url
+        expect(response.status).to eq(302)
+      end
+    end
+
+    context "with common user" do 
+      before(:each) do
+        sign_in user
+      end
+
+      it "renders a successful response" do
+        Classroom.create! valid_attributes
+        get classrooms_url
+        expect(response).to be_successful
+      end
     end
   end
 
   describe "GET /show" do
-    it "renders a successful response" do
-      classroom = Classroom.create! valid_attributes
-      get classroom_url(classroom)
-      expect(response).to be_successful
+    context "with no user" do
+      it "redirects user" do
+        classroom = Classroom.create! valid_attributes
+        get classroom_url(classroom)
+        expect(response).to redirect_to(new_user_session_path)
+      end
+
+      it "renders a response with 302 status - redirected" do
+        classroom = Classroom.create! valid_attributes
+        get classroom_url(classroom)
+        expect(response.status).to eq(302)
+      end
+    end
+
+    context "with common user" do
+      before(:each) do
+        sign_in user
+      end
+
+      it "renders a successful response" do
+        classroom = Classroom.create! valid_attributes
+        get classroom_url(classroom)
+        expect(response).to be_successful
+      end
     end
   end
 
   describe "GET /new" do
-    it "renders a successful response" do
-      get new_classroom_url
-      expect(response).to be_successful
+    context "with no user" do
+      it "redirects user" do
+        get new_classroom_url
+        expect(response).to redirect_to(new_user_session_path)
+      end
+
+      it "renders a response with 302 status - redirected" do
+        get new_classroom_url
+        expect(response.status).to eq(302)
+      end
+    end
+
+    context "with common user" do
+      before(:each) do
+        sign_in user
+      end
+
+      it "redirects user" do
+        get new_classroom_url
+        expect(response).to redirect_to(authenticated_root_url)
+      end
+
+      it "renders a response with 302 status - redirected" do
+        get new_classroom_url
+        expect(response.status).to eq(302)
+      end
+    end
+
+    context "with moderator user" do
+      before(:each) do
+        sign_in moderator
+      end
+
+      it "renders a successful response" do
+        get new_classroom_url
+        expect(response).to be_successful
+      end
     end
   end
 
   describe "GET /edit" do
-    it "render a successful response" do
-      classroom = Classroom.create! valid_attributes
-      get edit_classroom_url(classroom)
-      expect(response).to be_successful
+    context "with no user" do
+      it "redirects user" do
+        classroom = Classroom.create! valid_attributes
+        get edit_classroom_url(classroom)
+        expect(response).to redirect_to(new_user_session_path)
+      end
+
+      it "renders a response with 302 status - redirected" do
+        classroom = Classroom.create! valid_attributes
+        get edit_classroom_url(classroom)
+        expect(response.status).to eq(302)
+      end
+    end
+
+    context "with common user" do
+      before(:each) do
+        sign_in user
+      end
+
+      it "redirects user" do
+        classroom = Classroom.create! valid_attributes
+        get edit_classroom_url(classroom)
+        expect(response).to redirect_to(authenticated_root_url)
+      end
+
+      it "renders a response with 302 status - redirected" do
+        classroom = Classroom.create! valid_attributes
+        get edit_classroom_url(classroom)
+        expect(response.status).to eq(302)
+      end
+    end
+
+    context "with moderator user" do
+      before(:each) do
+        sign_in moderator
+      end
+
+      it "renders a successful response" do
+        classroom = Classroom.create! valid_attributes
+        get edit_classroom_url(classroom)
+        expect(response).to be_successful
+      end
     end
   end
 
   describe "POST /create" do
-    context "with valid parameters" do
-      it "creates a new Classroom" do
-        expect {
-          post classrooms_url, params: { classroom: valid_attributes }
-        }.to change(Classroom, :count).by(1)
+    context "with no user" do
+      it "redirects user" do
+        post classrooms_url, params: { classroom: valid_attributes }
+        expect(response).to redirect_to(new_user_session_path)
       end
 
-      it "redirects to the created classroom" do
+      it "renders a response with 302 status - redirected" do
         post classrooms_url, params: { classroom: valid_attributes }
-        expect(response).to redirect_to(classroom_url(Classroom.last))
+        expect(response.status).to eq(302)
       end
     end
 
-    context "with invalid parameters" do
-      it "does not create a new Classroom" do
-        expect {
-          post classrooms_url, params: { classroom: invalid_attributes }
-        }.to change(Classroom, :count).by(0)
+    context "with commmon user" do
+      before(:each) do
+        sign_in user
       end
 
-      it "renders a response with 422 status - unporcessable entity" do
-        post classrooms_url, params: { classroom: invalid_attributes }
-        expect(response.status).to eq(422)
+      it "redirects user" do
+        post classrooms_url, params: { classroom: valid_attributes }
+        expect(response).to redirect_to(authenticated_root_url)
+      end
+
+      it "renders a response with 302 status - redirected" do
+        post classrooms_url, params: { classroom: valid_attributes }
+        expect(response.status).to eq(302)
+      end
+    end
+
+    context "with moderator user" do
+      before(:each) do
+        sign_in moderator
+      end
+
+      context "with valid parameters" do
+        it "creates a new Classroom" do
+          expect {
+            post classrooms_url, params: { classroom: valid_attributes }
+          }.to change(Classroom, :count).by(1)
+        end
+
+        it "redirects to the created classroom" do
+          post classrooms_url, params: { classroom: valid_attributes }
+          expect(response).to redirect_to(classroom_url(Classroom.last))
+        end
+      end
+
+      context "with invalid parameters" do
+        it "does not create a new Classroom" do
+          expect {
+            post classrooms_url, params: { classroom: invalid_attributes }
+          }.to change(Classroom, :count).by(0)
+        end
+
+        it "renders a response with 422 status - unporcessable entity" do
+          post classrooms_url, params: { classroom: invalid_attributes }
+          expect(response.status).to eq(422)
+        end
       end
     end
   end
 
   describe "PATCH /update" do
-    context "with valid parameters" do
-      let(:new_attributes) {
-        { name: "new valid name" }
-      }
+    let(:new_attributes) {
+      { name: "new valid name" }
+    }
 
-      it "updates the requested classroom" do
+    context "with no user" do
+      it "redirects user" do
         classroom = Classroom.create! valid_attributes
         patch classroom_url(classroom), params: { classroom: new_attributes }
-        classroom.reload
-        expect(classroom.name).to eq(new_attributes[:name])
+        expect(response).to redirect_to(new_user_session_path)
       end
 
-      it "redirects to the classroom" do
+      it "renders a response with 302 status - redirected" do
         classroom = Classroom.create! valid_attributes
         patch classroom_url(classroom), params: { classroom: new_attributes }
-        classroom.reload
-        expect(response).to redirect_to(classroom_url(classroom))
+        expect(response.status).to eq(302)
       end
     end
 
-    context "with invalid parameters" do
-      it "renders a response with 422 status - unporcessable entity" do
+    context "with commmon user" do
+      before(:each) do
+        sign_in user
+      end
+      
+      it "redirects user" do
         classroom = Classroom.create! valid_attributes
-        patch classroom_url(classroom), params: { classroom: invalid_attributes }
-        expect(response.status).to eq(422)
+        patch classroom_url(classroom), params: { classroom: new_attributes }
+        expect(response).to redirect_to(authenticated_root_url)
+      end
+
+      it "renders a response with 302 status - redirected" do
+        classroom = Classroom.create! valid_attributes
+        patch classroom_url(classroom), params: { classroom: new_attributes }
+        expect(response.status).to eq(302)
+      end
+    end
+
+    context "with moderator user" do
+      before(:each) do
+        sign_in moderator
+      end
+
+      context "with valid parameters" do
+        it "updates the requested classroom" do
+          classroom = Classroom.create! valid_attributes
+          patch classroom_url(classroom), params: { classroom: new_attributes }
+          classroom.reload
+          expect(classroom.name).to eq(new_attributes[:name])
+        end
+
+        it "redirects to the classroom" do
+          classroom = Classroom.create! valid_attributes
+          patch classroom_url(classroom), params: { classroom: new_attributes }
+          classroom.reload
+          expect(response).to redirect_to(classroom_url(classroom))
+        end
+      end
+
+      context "with invalid parameters" do
+        it "renders a response with 422 status - unporcessable entity" do
+          classroom = Classroom.create! valid_attributes
+          patch classroom_url(classroom), params: { classroom: invalid_attributes }
+          expect(response.status).to eq(422)
+        end
       end
     end
   end
 
   describe "DELETE /destroy" do
-    it "destroys the requested classroom" do
-      classroom = Classroom.create! valid_attributes
-      expect {
+    context "with no user" do
+      it "redirects user" do
+        classroom = Classroom.create! valid_attributes
         delete classroom_url(classroom)
-      }.to change(Classroom, :count).by(-1)
+        expect(response).to redirect_to(new_user_session_path)
+      end
+
+      it "renders a response with 302 status - redirected" do
+        classroom = Classroom.create! valid_attributes
+        delete classroom_url(classroom)
+        expect(response.status).to eq(302)
+      end
     end
 
-    it "redirects to the classrooms list" do
-      classroom = Classroom.create! valid_attributes
-      delete classroom_url(classroom)
-      expect(response).to redirect_to(classrooms_url)
+    context "with commmon user" do
+      before(:each) do
+        sign_in user
+      end
+      
+      it "redirects user" do
+        classroom = Classroom.create! valid_attributes
+        delete classroom_url(classroom)
+        expect(response).to redirect_to(authenticated_root_url)
+      end
+
+      it "renders a response with 302 status - redirected" do
+        classroom = Classroom.create! valid_attributes
+        delete classroom_url(classroom)
+        expect(response.status).to eq(302)
+      end
+    end
+
+    context "with moderator user" do
+      before(:each) do
+        sign_in moderator
+      end
+
+      it "destroys the requested classroom" do
+        classroom = Classroom.create! valid_attributes
+        expect {
+          delete classroom_url(classroom)
+        }.to change(Classroom, :count).by(-1)
+      end
+
+      it "redirects to the classrooms list" do
+        classroom = Classroom.create! valid_attributes
+        delete classroom_url(classroom)
+        expect(response).to redirect_to(classrooms_url)
+      end
     end
   end
 end

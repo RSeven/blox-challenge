@@ -26,8 +26,16 @@
     <%= form.datetime_select :end_time %>
   </div>
 
+  <% if @event.classroom.blank? %>
+    <div class="field">
+      <%= form.label :classroom %>
+      <%= form.collection_select :classroom_id, Classroom.order(:name), :id, :name %>
+    </div>
+  <% else %>
+    <%= form.hidden_field :classroom_id %>
+  <% end %>
+
   <%= form.hidden_field :user_id %>
-  <%= form.hidden_field :classroom_id %>
 
   <div class="actions">
     <%= form.submit %>

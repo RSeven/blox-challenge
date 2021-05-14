@@ -2,4 +2,8 @@
 
 <%= render 'form', event: @event %>
 
-<%= link_to 'Back', events_path %>
+<% if @event.classroom.blank? %>
+  <%= link_to 'Back', classrooms_path %>
+<% else %>
+  <%= link_to 'Back', classroom_path(@event.classroom) %>
+<% end %>

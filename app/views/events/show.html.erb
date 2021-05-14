@@ -17,13 +17,16 @@
 
 <p>
   <strong>User:</strong>
-  <%= @event.user_id %>
+  <%= @event.user.name %>
 </p>
 
 <p>
   <strong>Classroom:</strong>
-  <%= @event.classroom_id %>
+  <%= @event.classroom.name %>
 </p>
 
-<%= link_to 'Edit', edit_event_path(@event) %> |
-<%= link_to 'Back', events_path %>
+<% if @event.user == current_user %>
+  <%= link_to 'Edit', edit_event_path(@event) %> |
+  <%= link_to 'Destroy', @event, method: :delete, data: { confirm: 'Are you sure?' } %> |
+<% end %>
+<%= link_to 'Back', classroom_path(@event.classroom) %>

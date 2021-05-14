@@ -2,24 +2,26 @@
   <p id="notice"><%= notice %></p>
 
   <p>
+    <% if current_user.moderator? %>
+      <%= link_to 'Edit', edit_classroom_path(@classroom) %> |
+    <% end %>
+    <%= link_to 'Back', classrooms_path %>
+  </p>
+
+  <p>
     <strong>Name:</strong>
     <%= @classroom.name %>
   </p>
 
   <%= month_calendar(events: @events) do |date, events| %>
-    <%= date.day %>
+    <p class="text-right"><small><%= date.day %></small></p>
 
-    <ul>
-      <% events.each do |event| %>
-        <li>
-          <%= event.start_time.strftime("%I:%M%p") %> <%= event.title %>
-        </li>
-      <% end %>
-    </ul>
-
+    <% events.each do |event| %>
+      <p>
+        <%= link_to "#{event.start_time.strftime("%I:%M%p")} #{event.title}", event_path(event), class: "badge badge-primary w-100" %>
+      </p>
+    <% end %>
+    
     <%= link_to '+ New event', new_event_path(date: date, classroom_id: @classroom.id) %>
   <% end %>
-
-  <%= link_to 'Edit', edit_classroom_path(@classroom) %> |
-  <%= link_to 'Back', classrooms_path %>
 </div>
