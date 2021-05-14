@@ -14,6 +14,7 @@
 
 RSpec.describe "/events", type: :request do
   let(:user) { User.create(email: "user@test.com", password: "test_pass") }
+  let(:user2) { User.create(email: "user2@test.com", password: "test_pass") }
   let(:moderator) { User.create(email: "user@test.com", password: "test_pass", role: :moderator) }
   let(:classroom) { Classroom.create(name: "test classroom") }
   
@@ -82,15 +83,10 @@ RSpec.describe "/events", type: :request do
       before(:each) do
         sign_in user
       end
-      
-      context "without a defined classroom" do
-      end
 
-      context "with a defined classroom" do
-        it "renders a successful response" do
-          get new_event_url(classroom_id: classroom.id)
-          expect(response).to be_successful
-        end
+      it "renders a successful response" do
+        get new_event_url(classroom_id: classroom.id)
+        expect(response).to be_successful
       end
     end
   end
@@ -119,6 +115,18 @@ RSpec.describe "/events", type: :request do
         event = Event.create! valid_attributes
         get edit_event_url(event)
         expect(response).to be_successful
+      end
+    end
+
+    context "with wrong user" do
+      before(:each) do
+        sign_in user2
+      end
+      
+      it "render a successful response" do
+        event = Event.create! valid_attributes
+        get edit_event_url(event)
+        expect(response.status).to eq(302)
       end
     end
   end
@@ -170,14 +178,12 @@ RSpec.describe "/events", type: :request do
   end
 
   describe "PATCH /update" do
-    let(:user2) { User.create(email: "test_user2@example.com", password: "test_pass") }
     let(:classroom2) { Classroom.create(name: "test classroom 2") }
     let(:new_attributes) {
       {
         title: "test event title 2",
         start_time: Time.now + 2.hour,
         end_time: Time.now + 3.hour,
-        user_id: user2.id,
         classroom_id: classroom2.id
       }
     }
@@ -207,7 +213,6 @@ RSpec.describe "/events", type: :request do
           patch event_url(event), params: { event: new_attributes }
           event.reload
           expect(event.title).to eq(new_attributes[:title])
-          expect(event.user_id).to eq(new_attributes[:user_id])
           expect(event.classroom_id).to eq(new_attributes[:classroom_id])
         end
 
@@ -225,6 +230,26 @@ RSpec.describe "/events", type: :request do
           patch event_url(event), params: { event: invalid_attributes }
           expect(response.status).to eq(422)
         end
+      end
+    end
+
+    context "with wrong user" do
+      before(:each) do
+        sign_in user2
+      end
+        
+      it "does not update the requested event" do
+        event = Event.create! valid_attributes
+        patch event_url(event), params: { event: new_attributes }
+        event.reload
+        expect(event.title).to_not eq(new_attributes[:title])
+        expect(event.classroom_id).to_not eq(new_attributes[:classroom_id])
+      end
+
+      it "redirects the user" do
+        event = Event.create! valid_attributes
+        patch event_url(event), params: { event: new_attributes }
+        expect(response.status).to eq(302)
       end
     end
   end
@@ -257,6 +282,25 @@ RSpec.describe "/events", type: :request do
       end
 
       it "redirects to the events list" do
+        event = Event.create! valid_attributes
+        delete event_url(event)
+        expect(response).to redirect_to(classroom_url(classroom))
+      end
+    end
+
+    context "with wrong user" do
+      before(:each) do
+        sign_in user2
+      end
+        
+      it "does not destroy the requested event" do
+        event = Event.create! valid_attributes
+        expect {
+          delete event_url(event)
+        }.to change(Event, :count).by(0)
+      end
+
+      it "redirects the user" do
         event = Event.create! valid_attributes
         delete event_url(event)
         expect(response).to redirect_to(classroom_url(classroom))
