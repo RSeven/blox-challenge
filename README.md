@@ -10,9 +10,9 @@ Descrição: https://github.com/sistema-blox/desafio
 ## Como usar o sistema
 ### Login
 Como cadastro não era um dos requisitos do teste, existe um seed que cria três usuários, suficientes para testar as funcionalidades. São eles:
-user_1@example.com:user_1
-user_2@example.com:user_2
-moderator@example.com:moderator
+* user_1@example.com:user_1
+* user_2@example.com:user_2
+* moderator@example.com:moderator
 
 ### Gerenciamento de Salas
 Os usuários do sistema são divididos em duas **roles**: *user* e *moderator*. Apenas moderadores podem criar, editar e excluir salas.
