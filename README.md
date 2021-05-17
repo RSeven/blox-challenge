@@ -7,12 +7,12 @@ Descrição: https://github.com/sistema-blox/desafio
 * O usuário não conseguirá reservar a sala se a mesma já estiver alocada à outro usuário;
 * Criação de uma tela de agenda onde usuários poderão visualizar / reservar todos os horários disponíveis;
 
-## Como usar o sistema
+## 1. Como usar o sistema
 ### Login
 Como cadastro não era um dos requisitos do teste, existe um seed que cria três usuários, suficientes para testar as funcionalidades. São eles:
-user_1@example.com:user_1
-user_2@example.com:user_2
-moderator@example.com:moderator
+* user_1@example.com:user_1
+* user_2@example.com:user_2
+* moderator@example.com:moderator
 
 ### Gerenciamento de Salas
 Os usuários do sistema são divididos em duas **roles**: *user* e *moderator*. Apenas moderadores podem criar, editar e excluir salas.
@@ -30,7 +30,7 @@ Um evento válido precisa:
 * Estar dentro do horário comercial (8:00 às 18:00)
 * Não conflitar com o horário de outro evento na mesma sala
 
-## Como foi feito
+## 2. Como foi feito
 ### Login
 O login foi feito utilizando Devise. O acesso para usuários deslogados é bloqueado utilizando o próprio método do Devise `authenticate_user!`.
 
