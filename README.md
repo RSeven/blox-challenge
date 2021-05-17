@@ -58,6 +58,8 @@ Unindo as duas é possível escrever:
   before_or_equal_to: Proc.new { |obj| Time.end_of_workday(obj.start_time || obj.end_time) }
 }`
 
+É importante verificar que na validação do `end_time`, o final do dia de trabalho é baseado no `start_time`. Dessa forma, não é possível ter eventos que atravessem de um dia para o outro.
+
 #### Checagem de disponibilidade
 Além de respeitar o horário comercial, a sala não pode estar ocupada no horário escolhido. Por isso também fazemos uma checagem utilizando o método `classroom_availability` presente em `models/event.rb`.
 
